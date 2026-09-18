@@ -1,4 +1,4 @@
-﻿name: CD — Despliegue Controlado a cPanel (admin.lbla.cl)
+name: CD — Despliegue Controlado a cPanel (admin.lbla.cl)
 
 "on":
   workflow_dispatch:
@@ -51,6 +51,7 @@ jobs:
         with:
           name: lbla-admin-dist
           path: dist/
+          include-hidden-files: true
           retention-days: 1
 
   deploy-production:
