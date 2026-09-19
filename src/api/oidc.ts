@@ -69,8 +69,9 @@ function base64UrlEncode(array: Uint8Array): string {
 
 /**
  * Initiates the OIDC Authorization Code Flow with PKCE.
+ * Supports optional upstream IdP delegation (e.g. 'google').
  */
-export async function initiateLogin(): Promise<void> {
+export async function initiateLogin(idp?: string): Promise<void> {
   const verifier = generateCodeVerifier();
   const challenge = await generateCodeChallenge(verifier);
   const state = generateCodeVerifier().substring(0, 16);
@@ -88,6 +89,10 @@ export async function initiateLogin(): Promise<void> {
     code_challenge: challenge,
     code_challenge_method: 'S256',
   });
+
+  if (idp) {
+    params.set('idp', idp);
+  }
 
   window.location.href = `${OIDC_CONFIG.authorizeEndpoint}?${params.toString()}`;
 }

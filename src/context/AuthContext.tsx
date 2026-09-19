@@ -15,7 +15,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   roles: string[];
-  login: () => Promise<void>;
+  login: (idp?: string) => Promise<void>;
   logout: () => void;
   handleCallback: (code: string, state: string) => Promise<void>;
 }
@@ -85,8 +85,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     initAuth();
   }, []);
 
-  const login = async () => {
-    await initiateLogin();
+  const login = async (idp?: string) => {
+    await initiateLogin(idp);
   };
 
   const logout = () => {

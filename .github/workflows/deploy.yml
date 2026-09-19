@@ -1,18 +1,21 @@
 name: CD — Despliegue Controlado a cPanel (admin.lbla.cl)
 
-"on":
+on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       dry_run:
         description: 'Simular despliegue sin transferir archivos a cPanel (Dry-Run)'
-        required: true
+        required: false
         type: boolean
         default: false
       deploy_reason:
         description: 'Motivo y justificación del despliegue productivo'
-        required: true
+        required: false
         type: string
-        default: 'Despliegue inicial de LBLA Admin en admin.lbla.cl'
+        default: 'Despliegue de LBLA Admin'
 
 concurrency:
   group: deploy-lbla-admin-production

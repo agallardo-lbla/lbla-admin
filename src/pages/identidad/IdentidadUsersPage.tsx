@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { KeyRound, Lock, Unlock, ShieldAlert, CheckCircle, Search, AlertCircle, History } from 'lucide-react';
+import { KeyRound, Lock, Unlock, ShieldAlert, CheckCircle, Search, AlertCircle, History, Sliders, ShieldCheck } from 'lucide-react';
 import {
   fetchIdentities,
   lockIdentity,
@@ -13,6 +13,7 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorDisplay } from '../../components/common/ErrorDisplay';
 import { AlertBadge } from '../../components/common/AlertBadge';
 import { ConfirmModal } from '../../components/common/ConfirmModal';
+import { PermisosModal } from '../../components/identidad/PermisosModal';
 import { useRBAC } from '../../hooks/useRBAC';
 
 export const IdentidadUsersPage: React.FC = () => {
@@ -28,7 +29,11 @@ export const IdentidadUsersPage: React.FC = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
 
-  const { canManageIdentity } = useRBAC();
+  // Permisos Modal state
+  const [permisosUser, setPermisosUser] = useState<IdentityUser | null>(null);
+
+  const { canManageIdentity, hasRole } = useRBAC();
+  const isSuperAdmin = hasRole('SUPERADMIN');
 
   const loadData = async () => {
     try {
@@ -149,6 +154,19 @@ export const IdentidadUsersPage: React.FC = () => {
                               {r}
                             </span>
                           ))}
+                          {u.app_permissions && Object.entries(u.app_permissions).map(([app, appRoles]) => {
+                            if (!appRoles || appRoles.length === 0) return null;
+                            const appShort = app.replace('lbla-', '').replace('-client', '').toUpperCase();
+                            return (
+                              <span
+                                key={app}
+                                className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-0.5"
+                                title={`Permisos en ${app}: ${appRoles.join(', ')}`}
+                              >
+                                <span className="font-bold">{appShort}:</span> {appRoles.join(', ')}
+                              </span>
+                            );
+                          })}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -165,6 +183,17 @@ export const IdentidadUsersPage: React.FC = () => {
                       <td className="px-6 py-4 text-right">
                         {canManageIdentity && (
                           <div className="inline-flex items-center gap-2">
+                            {isSuperAdmin && (
+                              <button
+                                onClick={() => setPermisosUser(u)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition"
+                                title="Gestionar Permisos por Aplicación"
+                              >
+                                <Sliders className="w-3.5 h-3.5" />
+                                <span>Permisos</span>
+                              </button>
+                            )}
+
                             {isLocked ? (
                               <button
                                 onClick={() => {
@@ -239,6 +268,18 @@ export const IdentidadUsersPage: React.FC = () => {
         isLoading={actionLoading}
         onConfirm={handleExecuteAction}
         onCancel={() => setModalAction(null)}
+      />
+
+      {/* Modal de Gestión de Permisos por Aplicación */}
+      <PermisosModal
+        isOpen={!!permisosUser}
+        user={permisosUser}
+        onClose={() => setPermisosUser(null)}
+        onSuccess={(msg) => {
+          setFeedbackMsg(msg);
+          loadData();
+          setTimeout(() => setFeedbackMsg(null), 4000);
+        }}
       />
     </div>
   );
