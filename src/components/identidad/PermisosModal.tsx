@@ -10,7 +10,8 @@ import {
   ShoppingBag,
   Sliders,
   Sparkles,
-  Info
+  Info,
+  Laptop
 } from 'lucide-react';
 import {
   IdentityUser,
@@ -123,6 +124,8 @@ export const PermisosModal: React.FC<PermisosModalProps> = ({
         return <Clock className="w-5 h-5 text-amber-600" />;
       case 'lbla-mipyme-client':
         return <ShoppingBag className="w-5 h-5 text-purple-600" />;
+      case 'lbla-labs-client':
+        return <Laptop className="w-5 h-5 text-cyan-600" />;
       default:
         return <Sliders className="w-5 h-5 text-gray-600" />;
     }
