@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { runGooglePreview, applyGoogleBatch, GoogleSyncBatch, GoogleSyncItem } from '../../api/google';
+import React, { useState, useEffect } from 'react';
+import {
+  runGooglePreview,
+  applyGoogleBatch,
+  fetchGoogleBatches,
+  fetchGoogleBatch,
+  GoogleSyncBatch,
+  GoogleSyncItem,
+} from '../../api/google';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorDisplay } from '../../components/common/ErrorDisplay';
 import { ConfirmModal } from '../../components/common/ConfirmModal';
@@ -15,6 +22,7 @@ import {
   Play,
   Layers,
   HelpCircle,
+  Eye,
 } from 'lucide-react';
 
 export default function GoogleComparisonPage() {
@@ -29,6 +37,30 @@ export default function GoogleComparisonPage() {
   // Modal para aplicar cambios
   const [isApplyModalOpen, setIsApplyModalOpen] = useState<boolean>(false);
   const [applying, setApplying] = useState<boolean>(false);
+
+  // Cargar automáticamente el último lote analizado en modo auditoría (Opción C)
+  useEffect(() => {
+    let isMounted = true;
+    const loadRecentBatch = async () => {
+      try {
+        setLoading(true);
+        const batches = await fetchGoogleBatches();
+        if (isMounted && batches && batches.length > 0) {
+          const latestBatch = await fetchGoogleBatch(batches[0].id);
+          if (isMounted) {
+            setCurrentBatch(latestBatch);
+          }
+        }
+      } catch (err: any) {
+        // Silencioso al cargar inicial si aún no hay lotes
+        console.info('No hay lotes previos de Google Workspace:', err?.message || err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    loadRecentBatch();
+    return () => { isMounted = false; };
+  }, []);
 
   const handleRunPreview = async () => {
     try {
