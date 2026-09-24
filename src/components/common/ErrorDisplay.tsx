@@ -28,10 +28,13 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onRetry }) =>
       icon = <ShieldAlert className="w-6 h-6 text-orange-600" />;
     } else if (apiErr.status === 404) {
       title = 'Registro no Encontrado';
-      message = 'El elemento solicitado no existe en la base canónica de Core.';
-    } else if (apiErr.status === 0 || apiErr.status === 408) {
+    } else if (apiErr.status === 408) {
+      title = 'Tiempo de Espera Agotado';
+      message = 'La consulta a los servicios de Google Workspace o Core tomó más tiempo del esperado. Puedes reintentar ahora.';
+      icon = <RefreshCw className="w-6 h-6 text-amber-600" />;
+    } else if (apiErr.status === 0) {
       title = 'Sin Conexión con LBLA Core';
-      message = 'No es posible comunicar con el servidor Core. Verifica la conexión o el servicio Docker.';
+      message = 'No fue posible comunicar con el servidor institucional Core. Verifica tu conexión de red o reintenta.';
       icon = <WifiOff className="w-6 h-6 text-slate-600" />;
     } else {
       message = apiErr.message || message;

@@ -63,7 +63,7 @@ export interface GoogleSyncBatch {
 }
 
 export async function fetchGoogleStatus(): Promise<GoogleStatus> {
-  return apiClient.get<GoogleStatus>('/google-workspace/status/');
+  return apiClient.get<GoogleStatus>('/google-workspace/status/', undefined, { timeout: 60000 });
 }
 
 export async function fetchGoogleUsers(params: {
@@ -80,12 +80,16 @@ export async function fetchGoogleUsers(params: {
 
   const qs = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
   return apiClient.get<{ users: GoogleDirectoryUser[]; next_page_token?: string; total_estimated?: number }>(
-    `/google-workspace/users/${qs}`
+    `/google-workspace/users/${qs}`,
+    undefined,
+    { timeout: 60000 }
   );
 }
 
 export async function runGooglePreview(scope_type: 'ALL' | 'STUDENTS' | 'STAFF' = 'ALL'): Promise<GoogleSyncBatch> {
-  return apiClient.post<GoogleSyncBatch>('/google-workspace/sync/preview/', { scope_type });
+  const formData = new FormData();
+  formData.append('scope_type', scope_type);
+  return apiClient.post<GoogleSyncBatch>('/google-workspace/sync/preview/', formData, { timeout: 180000 });
 }
 
 export async function fetchGoogleBatches(): Promise<GoogleSyncBatch[]> {
@@ -98,7 +102,9 @@ export async function fetchGoogleBatch(id: string): Promise<GoogleSyncBatch> {
 }
 
 export async function applyGoogleBatch(id: string, confirmed: boolean = true): Promise<GoogleSyncBatch> {
-  return apiClient.post<GoogleSyncBatch>(`/google-workspace/sync/batches/${id}/apply/`, { confirmed });
+  const formData = new FormData();
+  formData.append('confirmed', String(confirmed));
+  return apiClient.post<GoogleSyncBatch>(`/google-workspace/sync/batches/${id}/apply/`, formData, { timeout: 180000 });
 }
 
 export async function suspendGoogleUser(userKey: string, reason: string): Promise<GoogleDirectoryUser> {

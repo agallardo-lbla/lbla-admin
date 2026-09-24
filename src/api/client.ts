@@ -62,7 +62,9 @@ class CoreApiClient {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+    const customTimeout = (options as any)?.timeout;
+    const timeoutMs = typeof customTimeout === 'number' ? customTimeout : 120000; // 120s default timeout
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const response = await fetch(url, {
@@ -126,7 +128,7 @@ class CoreApiClient {
     }
   }
 
-  public get<T>(endpoint: string, queryParams?: Record<string, any>): Promise<T> {
+  public get<T>(endpoint: string, queryParams?: Record<string, any>, extraOptions?: RequestInit & { timeout?: number }): Promise<T> {
     let url = endpoint;
     if (queryParams) {
       const filteredParams = Object.entries(queryParams)
@@ -137,33 +139,36 @@ class CoreApiClient {
         url += (url.includes('?') ? '&' : '?') + query;
       }
     }
-    return this.request<T>(url, { method: 'GET' });
+    return this.request<T>(url, { method: 'GET', ...extraOptions });
   }
 
-  public post<T>(endpoint: string, body?: any): Promise<T> {
+  public post<T>(endpoint: string, body?: any, extraOptions?: RequestInit & { timeout?: number }): Promise<T> {
     const isFormData = body instanceof FormData;
     return this.request<T>(endpoint, {
       method: 'POST',
       body: isFormData ? body : JSON.stringify(body || {}),
+      ...extraOptions,
     });
   }
 
-  public put<T>(endpoint: string, body: any): Promise<T> {
+  public put<T>(endpoint: string, body: any, extraOptions?: RequestInit & { timeout?: number }): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(body),
+      ...extraOptions,
     });
   }
 
-  public patch<T>(endpoint: string, body: any): Promise<T> {
+  public patch<T>(endpoint: string, body: any, extraOptions?: RequestInit & { timeout?: number }): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PATCH',
       body: JSON.stringify(body),
+      ...extraOptions,
     });
   }
 
-  public delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  public delete<T>(endpoint: string, extraOptions?: RequestInit & { timeout?: number }): Promise<T> {
+    return this.request<T>(endpoint, { method: 'DELETE', ...extraOptions });
   }
 }
 
