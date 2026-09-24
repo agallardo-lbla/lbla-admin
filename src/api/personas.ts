@@ -125,3 +125,23 @@ export async function fetchPersonaIdentificadores(id: string): Promise<ExternalI
   const res = await coreApi.get<any>(`/personas/${id}/identificadores/`);
   return Array.isArray(res) ? res : res.results || [];
 }
+
+export interface CreateFuncionarioPayload {
+  run_input: string;
+  nombres: string;
+  apellidos: string;
+  estamento: 'DOCENTE' | 'ASISTENTE' | 'DIRECTIVO';
+  cargo: string;
+  departamento?: string;
+  numero_registro?: string;
+  activo?: boolean;
+}
+
+export async function createFuncionario(data: CreateFuncionarioPayload): Promise<Funcionario> {
+  return coreApi.post<Funcionario>('/funcionarios/', data);
+}
+
+export async function importFuncionariosNomina(formData: FormData): Promise<any> {
+  return coreApi.post<any>('/funcionarios/importar-nomina/', formData);
+}
+
