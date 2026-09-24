@@ -63,7 +63,7 @@ export interface GoogleSyncBatch {
 }
 
 export async function fetchGoogleStatus(): Promise<GoogleStatus> {
-  return apiClient.get<GoogleStatus>('/api/v1/google-workspace/status/');
+  return apiClient.get<GoogleStatus>('/google-workspace/status/');
 }
 
 export async function fetchGoogleUsers(params: {
@@ -80,31 +80,31 @@ export async function fetchGoogleUsers(params: {
 
   const qs = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
   return apiClient.get<{ users: GoogleDirectoryUser[]; next_page_token?: string; total_estimated?: number }>(
-    `/api/v1/google-workspace/users/${qs}`
+    `/google-workspace/users/${qs}`
   );
 }
 
 export async function runGooglePreview(scope_type: 'ALL' | 'STUDENTS' | 'STAFF' = 'ALL'): Promise<GoogleSyncBatch> {
-  return apiClient.post<GoogleSyncBatch>('/api/v1/google-workspace/sync/preview/', { scope_type });
+  return apiClient.post<GoogleSyncBatch>('/google-workspace/sync/preview/', { scope_type });
 }
 
 export async function fetchGoogleBatches(): Promise<GoogleSyncBatch[]> {
-  const res = await apiClient.get<any>('/api/v1/google-workspace/sync/batches/');
+  const res = await apiClient.get<any>('/google-workspace/sync/batches/');
   return Array.isArray(res) ? res : res.results || [];
 }
 
 export async function fetchGoogleBatch(id: string): Promise<GoogleSyncBatch> {
-  return apiClient.get<GoogleSyncBatch>(`/api/v1/google-workspace/sync/batches/${id}/`);
+  return apiClient.get<GoogleSyncBatch>(`/google-workspace/sync/batches/${id}/`);
 }
 
 export async function applyGoogleBatch(id: string, confirmed: boolean = true): Promise<GoogleSyncBatch> {
-  return apiClient.post<GoogleSyncBatch>(`/api/v1/google-workspace/sync/batches/${id}/apply/`, { confirmed });
+  return apiClient.post<GoogleSyncBatch>(`/google-workspace/sync/batches/${id}/apply/`, { confirmed });
 }
 
 export async function suspendGoogleUser(userKey: string, reason: string): Promise<GoogleDirectoryUser> {
-  return apiClient.post<GoogleDirectoryUser>(`/api/v1/google-workspace/users/${encodeURIComponent(userKey)}/suspend/`, { reason });
+  return apiClient.post<GoogleDirectoryUser>(`/google-workspace/users/${encodeURIComponent(userKey)}/suspend/`, { reason });
 }
 
 export async function reactivateGoogleUser(userKey: string, reason: string): Promise<GoogleDirectoryUser> {
-  return apiClient.post<GoogleDirectoryUser>(`/api/v1/google-workspace/users/${encodeURIComponent(userKey)}/reactivate/`, { reason });
+  return apiClient.post<GoogleDirectoryUser>(`/google-workspace/users/${encodeURIComponent(userKey)}/reactivate/`, { reason });
 }
