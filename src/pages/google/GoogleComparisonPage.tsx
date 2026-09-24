@@ -161,10 +161,12 @@ export default function GoogleComparisonPage() {
       setApplyModalType(null);
       setSelectedItemForAction(null);
 
-      if (applyModalType === 'TRANSFERS') {
-        alert('¡Traslados de curso aplicados exitosamente en Google Workspace!');
+      if (updated.error_count > 0) {
+        alert(`Sincronización procesada: se ejecutaron ${updated.applied_count} operaciones, pero hubo ${updated.error_count} error(es).`);
+      } else if (applyModalType === 'TRANSFERS') {
+        alert(`¡Traslados de curso aplicados exitosamente en Google Workspace! (${updated.applied_count} ejecutados)`);
       } else if (applyModalType === 'CREATES') {
-        alert('¡Cuentas institucionales creadas exitosamente en Google Workspace!');
+        alert(`¡Cuentas institucionales creadas exitosamente en Google Workspace! (${updated.applied_count} cuentas creadas)`);
       } else if (applyModalType === 'SINGLE') {
         alert('¡Operación individual aplicada exitosamente!');
       } else {
@@ -184,6 +186,12 @@ export default function GoogleComparisonPage() {
       setActionInProgressId(item.id);
       const updated = await applyGoogleBatch(currentBatch.id, true, { item_ids: [item.id] });
       setCurrentBatch(updated);
+      const updatedItem = updated.items?.find((i) => i.id === item.id);
+      if (updatedItem?.error_message) {
+        alert(`Error al aplicar en Google Workspace: ${updatedItem.error_message}`);
+      } else {
+        alert(`Operación aplicada exitosamente para ${item.primary_email}`);
+      }
     } catch (err: any) {
       alert(`Error al aplicar cambio para ${item.primary_email}: ${err.message || 'Error desconocido'}`);
     } finally {
@@ -565,6 +573,11 @@ export default function GoogleComparisonPage() {
                               </button>
                             ) : (
                               <span className="text-xs text-slate-400 font-medium">Al día</span>
+                            )}
+                            {item.error_message && (
+                              <div className="text-[10px] text-rose-600 mt-1 font-mono max-w-[160px] truncate" title={item.error_message}>
+                                Error: {item.error_message}
+                              </div>
                             )}
                           </td>
                         </tr>

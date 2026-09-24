@@ -106,15 +106,16 @@ export async function applyGoogleBatch(
   confirmed: boolean = true,
   options?: { actions?: string[]; item_ids?: string[] }
 ): Promise<GoogleSyncBatch> {
-  const formData = new FormData();
-  formData.append('confirmed', String(confirmed));
+  const payload: Record<string, any> = {
+    confirmed: Boolean(confirmed),
+  };
   if (options?.actions && options.actions.length > 0) {
-    options.actions.forEach((a) => formData.append('actions', a));
+    payload.actions = options.actions;
   }
   if (options?.item_ids && options.item_ids.length > 0) {
-    options.item_ids.forEach((itemId) => formData.append('item_ids', itemId));
+    payload.item_ids = options.item_ids;
   }
-  return apiClient.post<GoogleSyncBatch>(`/google-workspace/sync/batches/${id}/apply/`, formData, { timeout: 180000 });
+  return apiClient.post<GoogleSyncBatch>(`/google-workspace/sync/batches/${id}/apply/`, payload, { timeout: 180000 });
 }
 
 export async function suspendGoogleUser(userKey: string, reason: string): Promise<GoogleDirectoryUser> {
