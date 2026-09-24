@@ -101,9 +101,19 @@ export async function fetchGoogleBatch(id: string): Promise<GoogleSyncBatch> {
   return apiClient.get<GoogleSyncBatch>(`/google-workspace/sync/batches/${id}/`);
 }
 
-export async function applyGoogleBatch(id: string, confirmed: boolean = true): Promise<GoogleSyncBatch> {
+export async function applyGoogleBatch(
+  id: string,
+  confirmed: boolean = true,
+  options?: { actions?: string[]; item_ids?: string[] }
+): Promise<GoogleSyncBatch> {
   const formData = new FormData();
   formData.append('confirmed', String(confirmed));
+  if (options?.actions && options.actions.length > 0) {
+    options.actions.forEach((a) => formData.append('actions', a));
+  }
+  if (options?.item_ids && options.item_ids.length > 0) {
+    options.item_ids.forEach((itemId) => formData.append('item_ids', itemId));
+  }
   return apiClient.post<GoogleSyncBatch>(`/google-workspace/sync/batches/${id}/apply/`, formData, { timeout: 180000 });
 }
 
