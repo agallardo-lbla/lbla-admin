@@ -16,15 +16,34 @@ import {
 import {
   IdentityUser,
   ApplicationCatalogItem,
+  StaffAccountItem,
   fetchApplicationCatalog,
-  updateUserPermissions
+  updateUserPermissions,
+  prepareStaffPermissions
 } from '../../api/identity';
 import { useAuth } from '../../context/AuthContext';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 
+export interface PermisosTargetUser {
+  id?: string | null;
+  identity_id?: string | null;
+  username: string;
+  email: string;
+  app_permissions?: Record<string, string[]>;
+  roles?: string[];
+  federated_provider?: string | null;
+  funcionario_id?: string | null;
+  persona_id?: string | null;
+  nombre_completo?: string | null;
+  cargo?: string | null;
+  estamento?: string | null;
+  run_formateado?: string | null;
+  provisioning_status?: 'UNPROVISIONED' | 'PREPARED' | 'ACTIVE';
+}
+
 interface PermisosModalProps {
   isOpen: boolean;
-  user: IdentityUser | null;
+  user: PermisosTargetUser | null;
   onClose: () => void;
   onSuccess: (message: string) => void;
 }
@@ -42,10 +61,11 @@ export const PermisosModal: React.FC<PermisosModalProps> = ({
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const userId = user?.id || user?.identity_id;
   const isSelf = Boolean(
     user && currentUser &&
-    (user.email.toLowerCase() === currentUser.email.toLowerCase() ||
-     user.id === currentUser.sub)
+    ((user.email && user.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+     (userId && userId === currentUser.sub))
   );
 
   useEffect(() => {
@@ -78,7 +98,6 @@ export const PermisosModal: React.FC<PermisosModalProps> = ({
     }
 
     setSelectedPermissions(prev => {
-      const current = prev[clientId] || [];
       // Si seleccionó 'NONE', vaciar permisos para esa app
       if (roleId === 'NONE') {
         const updated = { ...prev };
@@ -99,11 +118,21 @@ export const PermisosModal: React.FC<PermisosModalProps> = ({
       setSaving(true);
       setError(null);
 
-      await updateUserPermissions(user.id, {
-        app_permissions: selectedPermissions,
-      });
+      // Si es un funcionario o cuenta sin ID de identidad previo
+      if (user.funcionario_id || user.provisioning_status === 'UNPROVISIONED' || !userId) {
+        await prepareStaffPermissions({
+          email: user.email,
+          funcionario_id: user.funcionario_id || undefined,
+          app_permissions: selectedPermissions,
+        });
+        onSuccess(`Permisos preparados exitosamente para ${user.nombre_completo || user.username} (${user.email}). La identidad se activará automáticamente con estos permisos en su primer inicio de sesión con Google.`);
+      } else {
+        await updateUserPermissions(userId, {
+          app_permissions: selectedPermissions,
+        });
+        onSuccess(`Permisos actualizados exitosamente para ${user.username} (${user.email}).`);
+      }
 
-      onSuccess(`Permisos actualizados exitosamente para ${user.username} (${user.email}).`);
       onClose();
     } catch (err: any) {
       setError(err.message || 'Error al guardar los permisos en LBLA Core.');
@@ -143,7 +172,7 @@ export const PermisosModal: React.FC<PermisosModalProps> = ({
             <div>
               <h2 className="text-lg font-bold tracking-tight">Gestión Centralizada de Permisos</h2>
               <p className="text-xs text-slate-300 mt-0.5">
-                Asignación de accesos y roles por aplicación en el Ecosistema LBLA
+                Asignación y preparación de accesos por aplicación en el Ecosistema LBLA
               </p>
             </div>
           </div>
@@ -156,19 +185,44 @@ export const PermisosModal: React.FC<PermisosModalProps> = ({
         </div>
 
         {/* Tarjeta de Identidad Seleccionada */}
-        <div className="px-6 py-3 bg-slate-50 border-b border-gray-200/80 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-gray-700">Usuario:</span>
-            <span className="font-mono bg-white px-2 py-0.5 rounded border border-gray-200 text-gray-900 font-bold">
-              {user.username}
-            </span>
-            <span className="text-gray-400">|</span>
-            <span className="font-mono text-gray-600">{user.email}</span>
+        <div className="px-6 py-3.5 bg-slate-50 border-b border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="space-y-1">
+            {user.nombre_completo ? (
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-gray-900 text-sm">{user.nombre_completo}</span>
+                {user.run_formateado && (
+                  <span className="font-mono text-[11px] bg-white px-1.5 py-0.5 rounded border border-gray-200 text-gray-600">
+                    {user.run_formateado}
+                  </span>
+                )}
+                {user.cargo && (
+                  <span className="text-gray-500 text-xs font-medium">({user.cargo})</span>
+                )}
+              </div>
+            ) : null}
+            <div className="flex items-center gap-2 text-gray-600">
+              <span className="font-semibold text-gray-700">Cuenta:</span>
+              <span className="font-mono bg-white px-2 py-0.5 rounded border border-gray-200 text-gray-900 font-bold">
+                {user.username}
+              </span>
+              <span className="text-gray-400">|</span>
+              <span className="font-mono text-gray-600">{user.email}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
-              {user.federated_provider || 'Google Workspace'}
-            </span>
+          <div className="flex items-center gap-2 shrink-0">
+            {user.provisioning_status === 'UNPROVISIONED' ? (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                🟡 Sin identidad aprovisionada (Se preparará al guardar)
+              </span>
+            ) : user.provisioning_status === 'PREPARED' ? (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                🔵 Identidad preparada (Esperando primer login Google)
+              </span>
+            ) : (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                🟢 Activa / Con inicio de sesión
+              </span>
+            )}
           </div>
         </div>
 

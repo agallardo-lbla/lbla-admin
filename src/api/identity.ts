@@ -73,6 +73,74 @@ export async function unlockIdentity(id: string): Promise<IdentityUser> {
   return coreApi.post<IdentityUser>(`/identity/users/${id}/unlock/`, {});
 }
 
+export interface StaffAccountItem {
+  funcionario_id: string;
+  persona_id: string;
+  run_formateado: string;
+  nombre_completo: string;
+  nombres: string;
+  apellidos: string;
+  email: string;
+  username: string;
+  estamento: 'DOCENTE' | 'ASISTENTE' | 'DIRECTIVO';
+  cargo: string;
+  departamento: string;
+  activo: boolean;
+  google_user_id?: string;
+  google_ou?: string;
+  google_suspended?: boolean;
+  provisioning_status: 'UNPROVISIONED' | 'PREPARED' | 'ACTIVE';
+  provisioning_status_display: string;
+  identity_id: string | null;
+  identity_status: string | null;
+  roles: string[];
+  app_permissions: Record<string, string[]>;
+  last_login_at: string | null;
+  last_sync_at: string | null;
+}
+
+export interface StaffAccountListResponse {
+  count: number;
+  last_sync: {
+    batch_id: string;
+    completed_at: string;
+    mode: string;
+    status: string;
+    matches_count: number;
+    total_staff: number;
+  } | null;
+  results: StaffAccountItem[];
+}
+
+export async function fetchStaffAccounts(params?: {
+  q?: string;
+  provisioning_status?: string;
+  estamento?: string;
+}): Promise<StaffAccountListResponse> {
+  return coreApi.get<StaffAccountListResponse>('/identity/users/staff-accounts/', params);
+}
+
+export async function prepareStaffPermissions(data: {
+  email: string;
+  funcionario_id?: string;
+  roles?: string[];
+  app_permissions: Record<string, string[]>;
+}): Promise<StaffAccountItem> {
+  return coreApi.post<StaffAccountItem>('/identity/users/prepare-staff/', data);
+}
+
+export async function syncStaffDirectory(): Promise<{
+  batch_id: string;
+  completed_at: string;
+  status: string;
+  total_core_evaluated: number;
+  matches_count: number;
+  differences_count: number;
+  message: string;
+}> {
+  return coreApi.post('/identity/users/sync-staff-directory/', {});
+}
+
 export async function fetchIdentityAuditLogs(params?: { event_type?: string; identity_id?: string }): Promise<IdentityAuditLog[]> {
   const res = await coreApi.get<any>('/identity/audit-logs/', params);
   return Array.isArray(res) ? res : res.results || [];
