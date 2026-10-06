@@ -1,22 +1,11 @@
 import React, { useState } from 'react';
-import { ShieldCheck, ArrowRight, Lock, Key, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleLogin = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      await login();
-    } catch (err: any) {
-      setError(err.message || 'No fue posible iniciar el flujo de autenticación.');
-      setLoading(false);
-    }
-  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -58,14 +47,14 @@ export const LoginPage: React.FC = () => {
 
           <div className="space-y-4">
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-600 leading-relaxed">
-              <p className="font-semibold text-slate-800 mb-1">Autenticación Unificada (SSO):</p>
-              El acceso a esta consola está protegido por <strong>LBLA ID</strong> mediante el protocolo estándar OpenID Connect y claves criptográficas asimétricas RS256.
+              <p className="font-semibold text-slate-800 mb-1">Acceso Institucional de Funcionarios:</p>
+              Inicia sesión con tu cuenta corporativa de Google para ingresar a la consola administrativa de LBLA.
             </div>
 
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full py-3 px-4 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl border border-slate-200 shadow-sm hover:shadow transition flex items-center justify-center gap-3 text-sm disabled:opacity-50"
+              className="w-full py-3.5 px-4 bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-xl border border-slate-200 shadow-sm hover:shadow transition flex items-center justify-center gap-3 text-sm disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -73,26 +62,7 @@ export const LoginPage: React.FC = () => {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
               </svg>
-              <span>{loading ? 'Conectando con Google...' : 'Continuar con Google Workspace'}</span>
-            </button>
-
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
-              </div>
-              <div className="relative flex justify-center text-[10px] uppercase">
-                <span className="bg-white px-2 text-slate-400 font-medium">o con LBLA ID directo</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleLogin}
-              disabled={loading}
-              className="w-full py-2.5 px-4 bg-lbla-blue hover:bg-lbla-dark text-white font-medium rounded-xl shadow hover:shadow-md transition flex items-center justify-center gap-2 text-xs disabled:opacity-50"
-            >
-              <Key className="w-3.5 h-3.5" />
-              <span>{loading ? 'Redirigiendo a LBLA ID...' : 'Iniciar Sesión con LBLA ID'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>{loading ? 'Conectando con Google...' : 'Continuar con tu cuenta institucional de Google'}</span>
             </button>
           </div>
 
