@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, AlertCircle } from 'lucide-react';
+import { Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
@@ -19,25 +19,32 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 flex flex-col justify-center items-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
+    <div className="min-h-screen bg-[#f5f7fa] flex flex-col justify-center items-center p-4">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         {/* Header con identidad institucional */}
-        <div className="bg-lbla-blue px-8 py-8 text-white text-center relative">
-          <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20 shadow-inner">
-            <ShieldCheck className="w-8 h-8 text-lbla-gold" />
+        <div className="px-8 pt-8 pb-4 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#334e9b]/10 border border-[#334e9b]/20 flex items-center justify-center mx-auto mb-4">
+            <svg width="36" height="36" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="LBLA Admin Controles">
+              <line x1="14" y1="8" x2="14" y2="40" stroke="#334e9b" strokeWidth="3.5" strokeLinecap="round" />
+              <circle cx="14" cy="18" r="5" fill="#334e9b" />
+              <line x1="24" y1="8" x2="24" y2="40" stroke="#334e9b" strokeWidth="3.5" strokeLinecap="round" />
+              <circle cx="24" cy="30" r="5" fill="#334e9b" />
+              <line x1="34" y1="8" x2="34" y2="40" stroke="#334e9b" strokeWidth="3.5" strokeLinecap="round" />
+              <circle cx="34" cy="22" r="5" fill="#334e9b" />
+            </svg>
           </div>
-          <h1 className="text-2xl font-black tracking-tight">LBLA ADMIN</h1>
-          <p className="text-xs text-blue-100 mt-1 font-medium">
-            Liceo Bicentenario Latinoamericano de Pichidegua
+          <h1 className="text-2xl font-black text-[#10204d] tracking-tight">LBLA Admin</h1>
+          <p className="text-xs text-slate-500 mt-1 font-medium">
+            Liceo Bicentenario Latinoamericano
           </p>
-          <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 rounded-full text-[11px] font-medium text-blue-200">
+          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-[#334e9b]/10 rounded-full text-[11px] font-semibold text-[#334e9b]">
             <Lock className="w-3 h-3" />
             Consola Administrativa Central
           </div>
         </div>
 
         {/* Cuerpo de Inicio de Sesión */}
-        <div className="p-8">
+        <div className="p-8 pt-4">
           {error && (
             <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -46,7 +53,7 @@ export const LoginPage: React.FC = () => {
           )}
 
           <div className="space-y-4">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-600 leading-relaxed">
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 leading-relaxed">
               <p className="font-semibold text-slate-800 mb-1">Acceso Institucional de Funcionarios:</p>
               Inicia sesión con tu cuenta corporativa de Google para ingresar a la consola administrativa de LBLA.
             </div>
@@ -54,9 +61,9 @@ export const LoginPage: React.FC = () => {
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-xl border border-slate-200 shadow-sm hover:shadow transition flex items-center justify-center gap-3 text-sm disabled:opacity-50"
+              className="w-full py-3.5 px-4 bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-xl border border-slate-300 shadow-sm hover:shadow transition flex items-center justify-center gap-3 text-sm disabled:opacity-50 cursor-pointer"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
@@ -65,14 +72,14 @@ export const LoginPage: React.FC = () => {
               <span>{loading ? 'Conectando con Google...' : 'Continuar con tu cuenta institucional de Google'}</span>
             </button>
           </div>
-
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-            <p className="text-[11px] text-slate-400">
-              Ambiente de Staging Seguro &bull; Liceo Bicentenario Latinoamericano &bull; 2026
-            </p>
-          </div>
         </div>
       </div>
+
+      {/* Pie institucional */}
+      <footer className="mt-6 text-center text-xs text-slate-500 leading-relaxed">
+        <div>&copy; 2026 Liceo Bicentenario Latinoamericano &middot; Todos los derechos reservados.</div>
+        <div className="mt-1 text-slate-400">Desarrollado por el Departamento de Inform&aacute;tica LBLA</div>
+      </footer>
     </div>
   );
 };
