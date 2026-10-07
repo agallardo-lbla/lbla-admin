@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
@@ -19,67 +19,135 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa] flex flex-col justify-center items-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        {/* Header con identidad institucional */}
-        <div className="px-8 pt-8 pb-4 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#334e9b]/10 border border-[#334e9b]/20 flex items-center justify-center mx-auto mb-4">
-            <svg width="36" height="36" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="LBLA Admin Controles">
-              <line x1="14" y1="8" x2="14" y2="40" stroke="#334e9b" strokeWidth="3.5" strokeLinecap="round" />
-              <circle cx="14" cy="18" r="5" fill="#334e9b" />
-              <line x1="24" y1="8" x2="24" y2="40" stroke="#334e9b" strokeWidth="3.5" strokeLinecap="round" />
-              <circle cx="24" cy="30" r="5" fill="#334e9b" />
-              <line x1="34" y1="8" x2="34" y2="40" stroke="#334e9b" strokeWidth="3.5" strokeLinecap="round" />
-              <circle cx="34" cy="22" r="5" fill="#334e9b" />
-            </svg>
+    <div className="flex min-h-screen w-full bg-[#f5f7fa] font-sans antialiased overflow-x-hidden">
+      {/* MITAD IZQUIERDA: Identidad, Botón y Pie de Página */}
+      <div className="w-full lg:w-1/2 min-h-screen bg-[#f5f7fa] flex flex-col justify-between p-7 sm:p-10 lg:px-20 lg:py-14 z-10 relative box-border">
+        {/* Encabezado Institucional: Insignia Oficial LBLA */}
+        <header className="w-full">
+          <div className="inline-flex items-center gap-4 text-decoration-none">
+            <img
+              src="/img/logo_lbla.png"
+              alt="Insignia LBLA"
+              className="h-14 w-auto object-contain drop-shadow-[0_2px_5px_rgba(0,0,0,0.06)]"
+            />
+            <div className="w-[1.5px] h-[38px] bg-[#cbd5e1]" />
+            <span className="text-[1.7rem] font-extrabold text-[#0b183e] tracking-tight leading-none">
+              LBLA
+            </span>
+            <div className="flex flex-col text-[0.76rem] font-bold text-[#64748b] tracking-wider leading-tight uppercase ml-0.5">
+              <span>LICEO BICENTENARIO</span>
+              <span>LATINOAMERICANO</span>
+            </div>
           </div>
-          <h1 className="text-2xl font-black text-[#10204d] tracking-tight">LBLA Admin</h1>
-          <p className="text-xs text-slate-500 mt-1 font-medium">
-            Liceo Bicentenario Latinoamericano
-          </p>
-          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-[#334e9b]/10 rounded-full text-[11px] font-semibold text-[#334e9b]">
-            <Lock className="w-3 h-3" />
-            Consola Administrativa Central
-          </div>
-        </div>
+        </header>
 
-        {/* Cuerpo de Inicio de Sesión */}
-        <div className="p-8 pt-4">
+        {/* Bloque Central: Identidad Admin LBLA y Acción */}
+        <main className="w-full max-w-[530px] my-auto py-6">
+          {/* Logo y Nombres de la Aplicación */}
+          <div className="flex items-center gap-5 sm:gap-6 mb-5">
+            <div className="w-[84px] h-[84px] sm:w-[104px] sm:h-[104px] rounded-[22px] sm:rounded-[28px] shrink-0 flex items-center justify-center bg-[#334e9b] shadow-[0_10px_26px_rgba(51,78,155,0.28)] hover:scale-[1.03] transition-transform duration-200 overflow-hidden">
+              <img
+                src="/img/logo_admin.png"
+                alt="Logo Admin LBLA"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="flex flex-col justify-center">
+              <h1 className="text-3xl sm:text-5xl font-extrabold text-[#0b183e] tracking-tight leading-none m-0">
+                Admin LBLA
+              </h1>
+              <div className="text-xl sm:text-2xl font-semibold text-[#64748b] tracking-tight mt-1">
+                Administración institucional
+              </div>
+            </div>
+          </div>
+
+          {/* Descripción Oficial */}
+          <p className="text-base sm:text-[1.12rem] text-[#475569] leading-relaxed mb-7 font-normal max-w-[480px]">
+            Gestión de usuarios, roles, permisos y configuración de los sistemas del establecimiento.
+          </p>
+
+          {/* Mensajes de Alerta */}
           {error && (
-            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-center gap-2.5 max-w-[515px]">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
               <span>{error}</span>
             </div>
           )}
 
-          <div className="space-y-4">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 leading-relaxed">
-              <p className="font-semibold text-slate-800 mb-1">Acceso Institucional de Funcionarios:</p>
-              Inicia sesión con tu cuenta corporativa de Google para ingresar a la consola administrativa de LBLA.
-            </div>
-
+          {/* Acción Principal: Google SSO Institucional */}
+          <div>
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-xl border border-slate-300 shadow-sm hover:shadow transition flex items-center justify-center gap-3 text-sm disabled:opacity-50 cursor-pointer"
+              className="w-full max-w-[515px] bg-[#334e9b] hover:bg-[#273d7a] text-white py-[7px] pr-[22px] pl-[8px] rounded-full flex items-center justify-between shadow-[0_5px_18px_rgba(51,78,155,0.3)] hover:shadow-[0_8px_24px_rgba(51,78,155,0.38)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 border border-transparent cursor-pointer disabled:opacity-60"
             >
-              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-              </svg>
-              <span>{loading ? 'Conectando con Google...' : 'Continuar con tu cuenta institucional de Google'}</span>
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 bg-white rounded-full flex items-center justify-center shrink-0 shadow-[0_2px_5px_rgba(0,0,0,0.1)]">
+                  <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true">
+                    <path
+                      fill="#EA4335"
+                      d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                    />
+                    <path
+                      fill="#4285F4"
+                      d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                    />
+                  </svg>
+                </div>
+                <span className="text-white font-semibold text-sm sm:text-[1.05rem] tracking-tight">
+                  {loading
+                    ? 'Conectando con Google...'
+                    : 'Continuar con tu cuenta institucional de Google'}
+                </span>
+              </div>
+              <div className="flex items-center justify-center text-white opacity-90">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </div>
             </button>
+
+            <div className="mt-4 text-sm text-[#64748b]">
+              Consola administrativa exclusiva para personal institucional autorizado.
+            </div>
           </div>
-        </div>
+        </main>
+
+        {/* Pie de Página Institucional */}
+        <footer className="text-sm leading-relaxed">
+          <div className="text-[#475569] font-medium">
+            &copy; 2026 Liceo Bicentenario Latinoamericano &middot; Todos los derechos reservados.
+          </div>
+          <div className="text-[#64748b] mt-0.5">
+            Desarrollado por el Departamento de Inform&aacute;tica LBLA
+          </div>
+        </footer>
       </div>
 
-      {/* Pie institucional */}
-      <footer className="mt-6 text-center text-xs text-slate-500 leading-relaxed">
-        <div>&copy; 2026 Liceo Bicentenario Latinoamericano &middot; Todos los derechos reservados.</div>
-        <div className="mt-1 text-slate-400">Desarrollado por el Departamento de Inform&aacute;tica LBLA</div>
-      </footer>
+      {/* MITAD DERECHA: Imagen de Portada Teñida con Color de Acento */}
+      <div
+        className="hidden lg:block lg:w-1/2 min-h-screen bg-[#334e9b] bg-cover bg-center relative"
+        style={{ backgroundImage: "url('/img/cover_admin.png')" }}
+        aria-hidden="true"
+      />
     </div>
   );
 };
