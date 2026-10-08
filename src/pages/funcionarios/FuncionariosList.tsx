@@ -23,6 +23,7 @@ import {
 import { SearchInput } from '../../components/common/SearchInput';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorDisplay } from '../../components/common/ErrorDisplay';
+import { useRBAC } from '../../hooks/useRBAC';
 
 interface FuncionariosListProps {
   onSelectFuncionario: (id: string) => void;
@@ -33,6 +34,7 @@ export const FuncionariosListPage: React.FC<FuncionariosListProps> = ({ onSelect
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const { canManageStaff } = useRBAC();
 
   // Modales
   const [showImportModal, setShowImportModal] = useState(false);
@@ -144,29 +146,31 @@ export const FuncionariosListPage: React.FC<FuncionariosListProps> = ({ onSelect
             Cuerpo docente, directivo y asistentes de la educación registrados en Core.
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => {
-              setImportResult(null);
-              setImportError(null);
-              setShowImportModal(true);
-            }}
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-xl border border-indigo-200 shadow-xs transition"
-          >
-            <FileSpreadsheet className="w-4 h-4" />
-            <span>Importar Nómina MINEDUC</span>
-          </button>
-          <button
-            onClick={() => {
-              setCreateError(null);
-              setShowCreateModal(true);
-            }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-lbla-blue hover:bg-lbla-dark text-white text-xs font-semibold rounded-xl shadow-xs transition"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>Nuevo Funcionario</span>
-          </button>
-        </div>
+        {canManageStaff && (
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => {
+                setImportResult(null);
+                setImportError(null);
+                setShowImportModal(true);
+              }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-xl border border-indigo-200 shadow-xs transition"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>Importar Nómina MINEDUC</span>
+            </button>
+            <button
+              onClick={() => {
+                setCreateError(null);
+                setShowCreateModal(true);
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-lbla-blue hover:bg-lbla-dark text-white text-xs font-semibold rounded-xl shadow-xs transition"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>Nuevo Funcionario</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Barra de Búsqueda */}

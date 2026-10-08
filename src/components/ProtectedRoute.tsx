@@ -17,7 +17,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   adminOnly = false,
 }) => {
   const { isAuthenticated, isLoading, logout, user } = useAuth();
-  const { isAdmin, roles } = useRBAC();
+  const { isAdmin, isStaff, isEstudiante, roles } = useRBAC();
 
   if (isLoading) {
     return <LoadingSpinner fullPage message="Verificando sesión institucional..." />;
@@ -27,13 +27,60 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <LoginPage />;
   }
 
+  // 1. Bloqueo estricto de estudiantes en admin.lbla.cl
+  if (isEstudiante) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center max-w-md mx-auto my-12 shadow-sm">
+        <ShieldAlert className="w-10 h-10 text-red-600 mx-auto mb-3" />
+        <h3 className="text-lg font-bold text-gray-900 mb-1">Acceso Denegado</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Los estudiantes no tienen autorización para ingresar al Panel Administrativo LBLA.
+        </p>
+        <div className="text-xs text-slate-600 bg-white/80 rounded-lg p-3 border border-red-200 mb-5 text-left">
+          <div>Cuenta: <strong className="text-slate-800">{user?.preferred_username || user?.email}</strong></div>
+          <div className="mt-1">Estamento: <span className="text-red-700 font-semibold">Estudiante</span></div>
+        </div>
+        <button
+          onClick={() => logout()}
+          className="w-full py-2 px-4 bg-white hover:bg-red-100/50 border border-red-300 text-red-800 font-semibold rounded-lg text-xs shadow-xs transition"
+        >
+          Cerrar Sesión
+        </button>
+      </div>
+    );
+  }
+
+  // 2. Denegación por defecto: Cuentas sin rol institucional o estamento no verificado
+  if (!isStaff) {
+    return (
+      <div className="bg-orange-50 border border-orange-200 rounded-xl p-8 text-center max-w-md mx-auto my-12 shadow-sm">
+        <ShieldAlert className="w-8 h-8 text-orange-600 mx-auto mb-3" />
+        <h3 className="text-lg font-bold text-gray-900 mb-1">Cuenta Sin Estamento Verificado</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Tu cuenta institucional no cuenta con un estamento de funcionario verificado en el padrón canónico de LBLA Core.
+        </p>
+        <div className="text-xs text-slate-600 bg-white/80 rounded-lg p-3 border border-orange-200 mb-5 text-left">
+          <div>Cuenta: <strong className="text-slate-800">{user?.preferred_username || user?.email}</strong></div>
+          <div className="mt-1">Roles: <code className="text-orange-700 font-mono text-[11px]">{roles.length > 0 ? roles.join(', ') : 'Ninguno'}</code></div>
+        </div>
+        <button
+          onClick={() => logout()}
+          className="w-full py-2 px-4 bg-white hover:bg-orange-100/50 border border-orange-300 text-orange-800 font-semibold rounded-lg text-xs shadow-xs transition"
+        >
+          Cerrar Sesión y Cambiar de Cuenta
+        </button>
+      </div>
+    );
+  }
+
+  // 3. Restricción de secciones administrativas avanzadas exclusivamente a SUPERADMIN
   if (adminOnly && !isAdmin) {
     return (
       <div className="bg-orange-50 border border-orange-200 rounded-xl p-8 text-center max-w-md mx-auto my-12 shadow-sm">
         <ShieldAlert className="w-8 h-8 text-orange-600 mx-auto mb-3" />
-        <h3 className="text-lg font-bold text-gray-900 mb-1">Acceso Restringido</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-1">Acceso Administrativo Restringido</h3>
         <p className="text-sm text-gray-600 mb-4">
-          Esta sección está reservada exclusivamente para directivos y administradores institucionales.
+          Esta sección está reservada exclusivamente para superadministradores del ecosistema.
         </p>
         <div className="text-xs text-slate-600 bg-white/80 rounded-lg p-3 border border-orange-200 mb-5 text-left">
           <div>Usuario actual: <strong className="text-slate-800">{user?.preferred_username || user?.email}</strong></div>
