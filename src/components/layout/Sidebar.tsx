@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -10,17 +10,45 @@ import {
   KeyRound,
   ShieldAlert,
   ChevronRight,
-  Cloud
+  ChevronDown,
+  Cloud,
 } from 'lucide-react';
 import { useRBAC } from '../../hooks/useRBAC';
 
 interface SidebarProps {
   currentPath: string;
   onNavigate: (path: string) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  currentPath,
+  onNavigate,
+  isOpen = false,
+  onClose,
+}) => {
   const { isAdmin } = useRBAC();
+
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+    'Académico': true,
+    'Integración SIGE': true,
+    'Google Workspace': true,
+  });
+
+  const toggleSubmenu = (label: string) => {
+    setExpandedMenus((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
+
+  const handleItemClick = (path: string) => {
+    onNavigate(path);
+    if (onClose) {
+      onClose();
+    }
+  };
 
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, public: true },
@@ -73,73 +101,119 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate }) => 
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 shrink-0 min-h-[calc(100vh-4rem)] flex flex-col justify-between p-4">
-      <div className="space-y-1">
-        <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-          Navegación Institucional
-        </div>
+    <>
+      {/* Overlay móvil */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 top-[60px] bg-black/45 z-30 lg:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
 
-        {navItems.map((item) => {
-          if (item.adminOnly && !isAdmin) return null;
+      <aside
+        className={`w-64 bg-[#15224A] border-r border-black/20 shrink-0 min-h-[calc(100vh-60px)] flex flex-col justify-between p-4 transition-transform duration-200 z-30 ${
+          isOpen
+            ? 'fixed top-[60px] left-0 bottom-0 translate-x-0 overflow-y-auto'
+            : 'hidden lg:flex'
+        }`}
+      >
+        <div className="space-y-1">
+          <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 py-2">
+            Navegación Institucional
+          </div>
 
-          const hasChildren = item.children && item.children.length > 0;
-          const isDirectActive = currentPath === item.path;
-          const isChildActive = hasChildren && item.children?.some((c) => currentPath === c.path);
+          {navItems.map((item) => {
+            if (item.adminOnly && !isAdmin) return null;
 
-          if (hasChildren) {
+            const hasChildren = item.children && item.children.length > 0;
+            const isDirectActive = currentPath === item.path;
+            const isChildActive =
+              hasChildren && item.children?.some((c) => currentPath === c.path);
+            const isExpanded = expandedMenus[item.label] ?? true;
+
+            if (hasChildren) {
+              const GroupIcon = item.icon;
+              return (
+                <div key={item.label} className="pt-1.5">
+                  <button
+                    type="button"
+                    onClick={() => toggleSubmenu(item.label)}
+                    className={`w-full flex items-center justify-between py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition cursor-pointer ${
+                      isChildActive
+                        ? 'text-white bg-white/[0.06]'
+                        : 'text-slate-400 hover:bg-white/[0.05] hover:text-white'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <GroupIcon
+                        size={18}
+                        className={isChildActive ? 'text-[#F8E475]' : 'text-slate-400'}
+                      />
+                      <span>{item.label}</span>
+                    </span>
+                    {isExpanded ? (
+                      <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                    ) : (
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                    )}
+                  </button>
+
+                  {isExpanded && (
+                    <div className="pl-4 space-y-1 mt-1">
+                      {item.children?.map((child) => {
+                        const active = currentPath === child.path;
+                        return (
+                          <button
+                            key={child.path}
+                            type="button"
+                            onClick={() => handleItemClick(child.path)}
+                            className={`w-full text-left py-2 px-3 rounded-lg text-xs font-medium transition flex items-center justify-between cursor-pointer ${
+                              active
+                                ? 'bg-[#334E9B]/40 border-l-[3px] border-[#F8E475] text-white font-semibold'
+                                : 'text-[#E2E8F0] hover:bg-white/[0.07] hover:text-white border-l-[3px] border-transparent'
+                            }`}
+                          >
+                            <span>{child.label}</span>
+                            {active && <ChevronRight className="w-3.5 h-3.5 text-[#F8E475]" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            const Icon = item.icon;
             return (
-              <div key={item.label} className="pt-2">
-                <div className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  <item.icon className="w-4 h-4 text-gray-400" />
-                  <span>{item.label}</span>
-                </div>
-                <div className="pl-6 space-y-0.5 mt-0.5">
-                  {item.children?.map((child) => {
-                    const active = currentPath === child.path;
-                    return (
-                      <button
-                        key={child.path}
-                        onClick={() => onNavigate(child.path)}
-                        className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center justify-between ${
-                          active
-                            ? 'bg-lbla-blue/10 text-lbla-blue font-semibold'
-                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                        }`}
-                      >
-                        <span>{child.label}</span>
-                        {active && <ChevronRight className="w-3 h-3 text-lbla-blue" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              <button
+                key={item.path}
+                type="button"
+                onClick={() => handleItemClick(item.path!)}
+                className={`w-full text-left py-2.5 px-3 rounded-lg text-sm font-medium transition flex items-center gap-3 cursor-pointer ${
+                  isDirectActive
+                    ? 'bg-[#334E9B]/40 border-l-[3px] border-[#F8E475] text-white font-semibold'
+                    : 'text-[#E2E8F0] hover:bg-white/[0.07] hover:text-white border-l-[3px] border-transparent'
+                }`}
+              >
+                <Icon
+                  size={18}
+                  className={isDirectActive ? 'text-[#F8E475] shrink-0' : 'text-[#E2E8F0]/75 shrink-0'}
+                />
+                <span>{item.label}</span>
+              </button>
             );
-          }
-
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.path}
-              onClick={() => onNavigate(item.path!)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-3 ${
-                isDirectActive
-                  ? 'bg-lbla-blue text-white shadow-xs font-semibold'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-              }`}
-            >
-              <Icon className={`w-4 h-4 ${isDirectActive ? 'text-white' : 'text-gray-400'}`} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="pt-4 border-t border-gray-100 px-3">
-        <div className="text-[10px] text-gray-400 font-mono">
-          <div>LBLA Core API v1</div>
-          <div>OIDC / PKCE S256</div>
+          })}
         </div>
-      </div>
-    </aside>
+
+        <div className="pt-4 border-t border-white/10 px-3 mt-4">
+          <div className="text-[10px] text-slate-400 font-mono">
+            <div>LBLA Core API v1</div>
+            <div>OIDC / PKCE S256</div>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 };

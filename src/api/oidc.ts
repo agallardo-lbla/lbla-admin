@@ -18,6 +18,11 @@ export interface UserInfo {
   email_verified: boolean;
   preferred_username: string;
   name?: string;
+  given_name?: string;
+  family_name?: string;
+  nombre?: string;
+  apellido?: string;
+  rol?: string;
   roles: string[];
   persona_id: string | null;
   status: string;
