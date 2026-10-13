@@ -1,104 +1,72 @@
-name: CD — Despliegue Controlado a cPanel (admin.lbla.cl)
+# ============================================================
+# PIPELINE DESHABILITADO — 12 de octubre de 2026
+# ============================================================
+# Este workflow fue desactivado porque 07-LBLA-ADMIN ha sido
+# formalmente absorbido por Portal LBLA (09-LBLA-CORE/apps/portal/).
+#
+# El módulo de Administración y Gobernanza está disponible en:
+#   https://core.lbla.cl/portal/admin/gestion/
+#
+# Para reactivar: renombrar este archivo a deploy.yml y
+# restaurar el bloque `on:` original.
+# ============================================================
 
+# BLOQUE on: ORIGINAL (PRESERVADO COMO REFERENCIA - NO ACTIVO):
+# on:
+#   push:
+#     branches:
+#       - main
+#   workflow_dispatch:
+#     inputs:
+#       dry_run:
+#         description: 'Simular despliegue sin transferir archivos a cPanel (Dry-Run)'
+#         required: false
+#         type: boolean
+#         default: false
+#       deploy_reason:
+#         description: 'Motivo y justificación del despliegue productivo'
+#         required: false
+#         type: string
+#         default: 'Despliegue de LBLA Admin'
+
+name: "[DESHABILITADO] CD — Despliegue Controlado a cPanel (admin.lbla.cl)"
+
+# Trigger desactivado: sólo manual explícito (no se activa en push)
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
-      dry_run:
-        description: 'Simular despliegue sin transferir archivos a cPanel (Dry-Run)'
-        required: false
-        type: boolean
-        default: false
-      deploy_reason:
-        description: 'Motivo y justificación del despliegue productivo'
-        required: false
+      confirm_reactivation:
+        description: 'ATENCIÓN: Este pipeline está DESHABILITADO. Escribir CONFIRMAR para ejecutar manualmente.'
+        required: true
         type: string
-        default: 'Despliegue de LBLA Admin'
+        default: ''
 
 concurrency:
   group: deploy-lbla-admin-production
   cancel-in-progress: false
 
 jobs:
-  validate-and-build:
-    name: ⚛️ Pruebas y Compilación para Producción (Node 20)
+  guard-decommission:
+    name: 🚫 Pipeline Descomisionado — Portal LBLA reemplaza Admin SPA
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Descargar Código (Checkout)
-        uses: actions/checkout@v4
-
-      - name: 🟢 Configurar Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
-
-      - name: 📦 Instalar Dependencias Limpias
-        run: npm ci
-
-      - name: 🧪 Ejecutar Suite de Pruebas Unitarias
-        run: npm test
-
-      - name: 🏗️ Compilar Proyecto para Producción (Vite Build)
-        env:
-          VITE_CORE_API_URL: 'https://core.lbla.cl/api/v1'
-          VITE_LBLA_ID_ISSUER: 'https://core.lbla.cl'
-        run: npm run build
-
-      - name: 📤 Guardar Artefacto Compilado (dist/)
-        uses: actions/upload-artifact@v4
-        with:
-          name: lbla-admin-dist
-          path: dist/
-          include-hidden-files: true
-          retention-days: 1
-
-  deploy-production:
-    name: 🚀 Despliegue Estático a cPanel (admin.lbla.cl)
-    needs: validate-and-build
-    runs-on: ubuntu-latest
-    environment:
-      name: Production
-      url: https://admin.lbla.cl
-
-    steps:
-      - name: 📥 Descargar Artefacto Compilado (dist/)
-        uses: actions/download-artifact@v4
-        with:
-          name: lbla-admin-dist
-          path: dist
-
-      - name: 🛡️ Verificación Preventiva (Dry-Run)
-        if: ${{ inputs.dry_run }}
+      - name: Verificar confirmación explícita
         run: |
-          echo "======================================================"
-          echo "MODO SIMULACIÓN (DRY-RUN) ACTIVO: NO SE MODIFICA CPANEL"
-          echo "Motivo: ${{ inputs.deploy_reason }}"
-          echo "Artefacto compilado verificado satisfactoriamente."
-          echo "======================================================"
-
-      - name: 🌐 Desplegar Archivos a Servidor cPanel (FTPS)
-        if: ${{ !inputs.dry_run }}
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.CPANEL_FTP_SERVER }}
-          username: ${{ secrets.CPANEL_FTP_USERNAME }}
-          password: ${{ secrets.CPANEL_FTP_PASSWORD }}
-          local-dir: dist/
-          server-dir: ${{ secrets.CPANEL_ADMIN_TARGET_DIR || 'public_html/admin.lbla.cl/' }}
-
-      - name: 🩺 Ejecutar Health Check Post-Despliegue
-        if: ${{ !inputs.dry_run }}
-        run: |
-          echo "Ejecutando verificación HTTP sobre https://admin.lbla.cl/..."
-          HTTP_STATUS=$(curl -s -k -L -o /dev/null -w "%{http_code}" https://admin.lbla.cl/ || echo "000")
-          echo "Código HTTP recibido: $HTTP_STATUS"
-          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 400 ]; then
-            echo "[PASS] Despliegue verificado: LBLA Admin responde satisfactoriamente."
-          else
-            echo "[WARN] Código HTTP recibido: $HTTP_STATUS."
+          if [ "${{ inputs.confirm_reactivation }}" != "CONFIRMAR" ]; then
+            echo "======================================================================"
+            echo "  ⚠️  PIPELINE DESHABILITADO — 07-LBLA-ADMIN DEPRECADO (12/10/2026)"
+            echo "======================================================================"
+            echo "  Este módulo ha sido absorbido por Portal LBLA."
+            echo "  Módulo activo: https://core.lbla.cl/portal/admin/gestion/"
+            echo "  Para reactivar, restaurar deploy.yml original y confirmar."
+            echo "======================================================================"
+            exit 1
           fi
+          echo "Ejecución manual confirmada. Proceder con cautela."
+
+      - name: Advertencia de módulo deprecado
+        run: |
+          echo "======================================================================"
+          echo "  AVISO: admin.lbla.cl es un despliegue CONGELADO sin mantenimiento."
+          echo "  No realizar cambios sin coordinación con Informática LBLA."
+          echo "======================================================================"
